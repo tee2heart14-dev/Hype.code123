@@ -1,0 +1,534 @@
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Pro HTML Playground</title>  
+<style>  
+  :root {  
+    --bg-dark: #1e1e1e;  
+    --bg-panel: #252526;  
+    --bg-active: #37373d;  
+    --accent: #007acc;  
+    --text-main: #d4d4d4;  
+    --text-muted: #858585;  
+    --border: #3e3e42;  
+    --success: #4caf50;  
+    --font-code: 'Consolas', 'Monaco', 'Courier New', monospace;  
+  }  { box-sizing: border-box; }
+
+
+body {
+margin: 0;
+padding: 0;
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+background-color: var(--bg-dark);
+color: var(--text-main);
+height: 100vh;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+}
+
+/* Header / Toolbar */
+header {
+background-color: var(--bg-panel);
+border-bottom: 1px solid var(--border);
+padding: 0 15px;
+height: 50px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+user-select: none;
+}
+
+.brand {
+font-weight: bold;
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--text-main);
+}
+
+.brand svg { fill: var(--accent); width: 20px; height: 20px; }
+
+.toolbar-actions {
+display: flex;
+gap: 10px;
+}
+
+button {
+background: transparent;
+border: 1px solid var(--border);
+color: var(--text-main);
+padding: 5px 12px;
+border-radius: 4px;
+cursor: pointer;
+font-size: 13px;
+display: flex;
+align-items: center;
+gap: 6px;
+transition: all 0.2s;
+}
+
+button:hover {
+background-color: var(--bg-active);
+border-color: var(--text-muted);
+}
+
+button.primary {
+background-color: var(--accent);
+border-color: var(--accent);
+color: white;
+}
+
+button.primary:hover {
+background-color: #0062a3;
+}
+
+/* Main Layout /
+main {
+flex: 1;
+display: flex;
+height: calc(100vh - 50px); / Subtract header */
+position: relative;
+}
+
+/* Editor Section */
+.editor-container {
+flex: 1;
+display: flex;
+flex-direction: column;
+border-right: 1px solid var(--border);
+position: relative;
+min-width: 300px;
+}
+
+.panel-header {
+background-color: var(--bg-panel);
+padding: 8px 15px;
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+color: var(--text-muted);
+display: flex;
+justify-content: space-between;
+align-items: center;
+border-bottom: 1px solid var(--border);
+}
+
+.editor-wrapper {
+flex: 1;
+position: relative;
+display: flex;
+overflow: hidden;
+background-color: var(--bg-dark);
+}
+
+/* Line Numbers */
+.line-numbers {
+width: 45px;
+background-color: var(--bg-dark);
+color: var(--text-muted);
+text-align: right;
+padding: 10px 5px;
+font-family: var(--font-code);
+font-size: 14px;
+line-height: 1.5;
+border-right: 1px solid var(--border);
+user-select: none;
+overflow: hidden;
+}
+
+/* Textarea */
+textarea#code {
+flex: 1;
+background-color: transparent;
+color: #d4d4d4;
+border: none;
+padding: 10px;
+font-family: var(--font-code);
+font-size: 14px;
+line-height: 1.5;
+resize: none;
+outline: none;
+white-space: pre;
+overflow: auto;
+tab-size: 2;
+}
+
+/* Preview Section */
+.preview-container {
+flex: 1;
+display: flex;
+flex-direction: column;
+background-color: white;
+min-width: 300px;
+position: relative;
+}
+
+iframe#preview {
+width: 100%;
+height: 100%;
+border: none;
+background-color: white;
+}
+
+/* Console Drawer */
+.console-drawer {
+height: 150px;
+background-color: var(--bg-panel);
+border-top: 1px solid var(--border);
+display: flex;
+flex-direction: column;
+transition: height 0.3s ease;
+}
+
+.console-drawer.collapsed {
+height: 30px;
+overflow: hidden;
+}
+
+.console-header {
+padding: 5px 15px;
+font-size: 12px;
+background: var(--bg-active);
+cursor: pointer;
+display: flex;
+justify-content: space-between;
+align-items: center;
+color: var(--text-muted);
+}
+
+.console-output {
+flex: 1;
+overflow-y: auto;
+padding: 10px;
+font-family: var(--font-code);
+font-size: 12px;
+}
+
+.log-entry {
+padding: 2px 0;
+border-bottom: 1px solid #333;
+color: #ddd;
+}
+.log-error { color: #ff6b68; }
+.log-warn { color: #f1c40f; }
+.log-info { color: #3498db; }
+
+/* Toast Notification */
+.toast {
+position: fixed;
+bottom: 20px;
+right: 20px;
+background-color: var(--accent);
+color: white;
+padding: 10px 20px;
+border-radius: 4px;
+font-size: 14px;
+opacity: 0;
+transform: translateY(20px);
+transition: all 0.3s;
+pointer-events: none;
+z-index: 1000;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* Resizer Handle */
+.resizer {
+width: 5px;
+background-color: var(--bg-panel);
+cursor: col-resize;
+border-left: 1px solid var(--border);
+border-right: 1px solid var(--border);
+transition: background 0.2s;
+}
+.resizer:hover, .resizer.active { background-color: var(--accent); }
+
+/* Mobile Responsive /
+@media (max-width: 768px) {
+main { flex-direction: column; }
+.editor-container { border-right: none; border-bottom: 1px solid var(--border); height: 50%; }
+.preview-container { height: 50%; }
+.resizer {
+width: 100%;
+height: 5px;
+cursor: row-resize;
+border: none;
+border-top: 1px solid var(--border);
+border-bottom: 1px solid var(--border);
+}
+.toolbar-actions span { display: none; } / Hide button text on mobile */
+}
+</style>
+
+</head>  
+<body>  <header>  
+  <div class="brand">  
+    <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>  
+    ProPlayground  
+  </div>  
+  <div class="toolbar-actions">  
+    <button id="openBtn" title="Open File">  
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>  
+      <span>Open</span>  
+    </button>  
+    <button id="saveBtn" class="primary" title="Save HTML">  
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>  
+      <span>Save</span>  
+    </button>  
+    <button id="clearConsoleBtn" title="Clear Console">  
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>  
+    </button>  
+    <input type="file" id="fileInput" accept=".html,.txt" style="display:none">  
+  </div>  
+</header>  <main>  
+  <!-- Editor Side -->  
+  <div class="editor-container" id="editorPane">  
+    <div class="panel-header">  
+      <span>index.html</span>  
+      <span style="font-size:10px; opacity:0.6">Auto-saved</span>  
+    </div>  
+    <div class="editor-wrapper">  
+      <div class="line-numbers" id="lineNumbers">1</div>  
+      <textarea id="code" spellcheck="false" placeholder="<!DOCTYPE html>&#10;<html>&#10;  <body>&#10;    <h1>Hello World</h1>&#10;  </body>&#10;</html>"></textarea>  
+    </div>  
+  </div>    <!-- Resizer -->    <div class="resizer" id="resizer"></div>    <!-- Preview Side -->    <div class="preview-container" id="previewPane">  
+    <div class="panel-header" style="background:#f0f0f0; color:#333; border-bottom:1px solid #ccc;">  
+      <span>Live Preview</span>  
+      <button id="refreshBtn" style="padding:2px 6px; font-size:10px; border:1px solid #ccc;">↻ Refresh</button>  
+    </div>  
+    <iframe id="preview" title="Preview"></iframe>  <!-- Console -->  
+<div class="console-drawer" id="consoleDrawer">  
+  <div class="console-header" id="consoleHeader">  
+    <span>Console</span>  
+    <span id="consoleToggle">▼</span>  
+  </div>  
+  <div class="console-output" id="consoleOutput">  
+    <div class="log-entry">Ready to log messages...</div>  
+  </div>  
+</div>
+
+  </div>  
+</main>  <div id="toast" class="toast">File Saved!</div>  <script>  
+  // Elements  
+  const code = document.getElementById('code');  
+  const preview = document.getElementById('preview');  
+  const lineNumbers = document.getElementById('lineNumbers');  
+  const consoleOutput = document.getElementById('consoleOutput');  
+  const consoleDrawer = document.getElementById('consoleDrawer');  
+  const consoleHeader = document.getElementById('consoleHeader');  
+  const editorPane = document.getElementById('editorPane');  
+  const previewPane = document.getElementById('previewPane');  
+  const resizer = document.getElementById('resizer');  
+  
+  // Initial Template  
+  const defaultTemplate = `<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <style>  
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }  
+    h1 { color: #333; }  
+    button { padding: 10px 20px; cursor: pointer; background: #007acc; color: white; border: none; border-radius: 4px; }  
+    button:hover { background: #005fa3; }  
+  </style>  </head>  
+<body>  
+  <h1>Hello, Developer!</h1>  
+  <p>Start editing to see magic happen.</p>  
+  <button onclick="handleClick()">Click Me</button>    <script>  
+    console.log("Script initialized!");  
+    function handleClick() {  
+      console.log("Button clicked!");  
+      alert("It works!");  
+    }  
+  <\/script>  
+</body>  
+</html>`;  
+  
+  // Load from LocalStorage or Default  
+  const savedCode = localStorage.getItem('pro-playground-code');  
+  code.value = savedCode ? savedCode : defaultTemplate;  
+  
+  // --- Logic: Line Numbers ---  
+  const updateLineNumbers = () => {  
+    const lines = code.value.split('\n').length;  
+    lineNumbers.innerHTML = Array(lines).fill(0).map((_, i) => i + 1).join('<br>');  
+  };  
+    
+  // Sync scroll  
+  code.addEventListener('scroll', () => {  
+    lineNumbers.scrollTop = code.scrollTop;  
+  });  
+  
+  // --- Logic: Live Preview with Console Interception ---  
+  let debounceTimer;  
+    
+  function updatePreview() {  
+    // Clear console visually  
+    consoleOutput.innerHTML = '';  
+      
+    // Create blob for iframe  
+    const blob = new Blob([code.value], { type: 'text/html' });  
+    const url = URL.createObjectURL(blob);  
+      
+    // Inject a script into the iframe to capture console logs  
+    // We wrap the user's code in a way that intercepts the window.console  
+    let userCode = code.value;  
+      
+    // To capture console logs effectively in a srcdoc/blob, we can inject a script   
+    // *before* the user's code that overrides console methods and postMessages back to parent.  
+    const interceptorScript = `  
+      <script>  
+        (function() {  
+          const originalConsole = window.console;  
+          const postLog = (type, args) => {  
+            const serialized = args.map(arg => {  
+              if (typeof arg === 'object') {  
+                try { return JSON.stringify(arg); } catch(e) { return arg.toString(); }  
+              }  
+              return String(arg);  
+            }).join(' ');  
+            window.parent.postMessage({ type: 'console-log', method: type, message: serialized }, '*');  
+          };  
+  
+          window.console = {  
+            log: (...args) => { originalConsole.log(...args); postLog('log', args); },  
+            error: (...args) => { originalConsole.error(...args); postLog('error', args); },  
+            warn: (...args) => { originalConsole.warn(...args); postLog('warn', args); },  
+            info: (...args) => { originalConsole.info(...args); postLog('info', args); }  
+          };  
+            
+          window.onerror = function(msg, url, line) {  
+             postLog('error', [msg + ' (Line ' + line + ')']);  
+          };  
+        })();  
+      <\/script>  
+    `;  
+  
+    // Inject interceptor after <head> or at start of body if no head  
+    const modifiedHtml = userCode.replace('<head>', '<head>' + interceptorScript)  
+                                 .replace('<html>', '<html>' + interceptorScript); // Fallback  
+  
+    preview.srcdoc = modifiedHtml;  
+      
+    // Update local storage  
+    localStorage.setItem('pro-playground-code', code.value);  
+    updateLineNumbers();  
+  }  
+  
+  // Debounced Input  
+  code.addEventListener('input', () => {  
+    updateLineNumbers();  
+    clearTimeout(debounceTimer);  
+    debounceTimer = setTimeout(updatePreview, 800); // Wait 800ms after typing stops  
+  });  
+  
+  // --- Logic: Console Listener ---  
+  window.addEventListener('message', (event) => {  
+    if (event.data && event.data.type === 'console-log') {  
+      const entry = document.createElement('div');  
+      entry.className = `log-entry log-${event.data.method}`;  
+      entry.textContent = `> ${event.data.message}`;  
+      consoleOutput.appendChild(entry);  
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;  
+    }  
+  });  
+  
+  // --- Logic: UI Interactions ---  
+  
+  // Toggle Console  
+  consoleHeader.addEventListener('click', () => {  
+    consoleDrawer.classList.toggle('collapsed');  
+    document.getElementById('consoleToggle').textContent =   
+      consoleDrawer.classList.contains('collapsed') ? '▲' : '▼';  
+  });  
+  
+  // Clear Console  
+  document.getElementById('clearConsoleBtn').addEventListener('click', () => {  
+    consoleOutput.innerHTML = '';  
+  });  
+  
+  // Refresh Preview  
+  document.getElementById('refreshBtn').addEventListener('click', updatePreview);  
+  
+  // Save File  
+  const toast = document.getElementById('toast');  
+  function showToast(msg) {  
+    toast.textContent = msg;  
+    toast.classList.add('show');  
+    setTimeout(() => toast.classList.remove('show'), 2000);  
+  }  
+  
+  document.getElementById('saveBtn').addEventListener('click', () => {  
+    const blob = new Blob([code.value], { type: 'text/html' });  
+    const url = URL.createObjectURL(blob);  
+    const a = document.createElement('a');  
+    a.href = url;  
+    a.download = 'index.html';  
+    a.click();  
+    URL.revokeObjectURL(url);  
+    showToast("File saved to downloads!");  
+  });  
+  
+  // Open File  
+  const openBtn = document.getElementById('openBtn');  
+  const fileInput = document.getElementById('fileInput');  
+    
+  openBtn.addEventListener('click', () => fileInput.click());  
+    
+  fileInput.addEventListener('change', (e) => {  
+    const file = e.target.files[0];  
+    if (file) {  
+      const reader = new FileReader();  
+      reader.onload = (event) => {  
+        code.value = event.target.result;  
+        updatePreview();  
+        showToast("File opened successfully!");  
+      };  
+      reader.readAsText(file);  
+    }  
+    // Reset input so same file can be selected again  
+    fileInput.value = '';  
+  });  
+  
+  // --- Logic: Resizable Split Pane ---  
+  let isResizing = false;  
+  
+  resizer.addEventListener('mousedown', (e) => {  
+    isResizing = true;  
+    resizer.classList.add('active');  
+    document.body.style.cursor = 'col-resize';  
+    // Prevent text selection while dragging  
+    document.body.style.userSelect = 'none';  
+  });  
+  
+  document.addEventListener('mousemove', (e) => {  
+    if (!isResizing) return;  
+      
+    // Calculate width percentage  
+    const containerWidth = document.querySelector('main').offsetWidth;  
+    const newWidth = (e.clientX / containerWidth) * 100;  
+      
+    // Limits (20% to 80%)  
+    if (newWidth > 20 && newWidth < 80) {  
+      editorPane.style.flex = `0 0 ${newWidth}%`;  
+      previewPane.style.flex = `0 0 ${100 - newWidth}%`;  
+    }  
+  });  
+  
+  document.addEventListener('mouseup', () => {  
+    if(isResizing) {  
+      isResizing = false;  
+      resizer.classList.remove('active');  
+      document.body.style.cursor = '';  
+      document.body.style.userSelect = '';  
+    }  
+  });  
+  
+  // Initial Render  
+  updateLineNumbers();  
+  updatePreview();  
+  
+</script>  </body>  
+</html>
